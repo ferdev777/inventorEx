@@ -1,0 +1,708 @@
+@import "tailwindcss";
+
+/* ================================================================
+   POS & Inventario — Premium Design System
+   ================================================================ */
+
+/* ===== Light Theme (Premium Slate) ===== */
+:root {
+  /* Page backgrounds - Slate-based for depth */
+  --bg-primary: #f1f5f9; /* slate-100: Main background */
+  --bg-secondary: #ffffff; /* white: Cards, Sidebar */
+  --bg-tertiary: #f8fafc; /* slate-50: Secondary areas */
+  --bg-elevated: #ffffff; /* white: Modals, Dropdowns */
+
+  /* Text - Sharper contrast */
+  --text-primary: #0f172a; /* slate-900: Headings, primary text */
+  --text-secondary: #334155; /* slate-700: Body text */
+  --text-tertiary: #64748b; /* slate-500: Icons, meta info */
+  --text-muted: #94a3b8; /* slate-400: Placeholders */
+  --text-inverse: #ffffff;
+
+  /* Borders - Subtle but defining */
+  --border-primary: #e2e8f0; /* slate-200: Card borders */
+  --border-secondary: #f1f5f9; /* slate-100: Dividers */
+  --border-subtle: rgba(0, 0, 0, 0.04);
+
+  /* Accent / Brand — Emerald (Unchanged but refined context) */
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --accent-light: #34d399;
+  --accent-bg: rgba(16, 185, 129, 0.1);
+  --accent-text: #065f46; /* darker for better contrast on light bg */
+  --accent-glow: rgba(16, 185, 129, 0.25);
+
+  /* Semantic - Optimized for light mode visibility */
+  --fiscal: #2563eb; /* blue-600 */
+  --fiscal-hover: #1d4ed8; /* blue-700 */
+  --fiscal-glow: rgba(37, 99, 235, 0.25);
+
+  --internal: #10b981; /* emerald-500 */
+  --internal-hover: #059669; /* emerald-600 */
+  --internal-glow: rgba(16, 185, 129, 0.25);
+
+  --danger: #ef4444; /* red-500 */
+  --danger-hover: #dc2626; /* red-600 */
+  --warning: #f59e0b; /* amber-500 */
+  --success: #10b981; /* emerald-500 */
+
+  /* Cards - Floating effect */
+  --card-bg: #ffffff;
+  --card-border: #e2e8f0;
+  --card-hover-border: #10b981; /* Accent color on hover */
+  --card-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --card-hover-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --card-radius: 12px;
+
+  /* Inputs - Clean and accessible */
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1; /* slate-300 for clearer bounds */
+  --input-focus-ring: rgba(16, 185, 129, 0.25);
+  --input-focus-border: #10b981;
+  --input-placeholder: #94a3b8;
+
+  /* Modal */
+  --modal-overlay: rgba(15, 23, 42, 0.4); /* slate-900 with opacity */
+
+  /* Cart */
+  --cart-bg: #ffffff;
+  --cart-item-bg: #f8fafc; /* slate-50 */
+  --cart-item-border: #e2e8f0;
+  --cart-item-hover: #f1f5f9;
+
+  /* Scrollbar */
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: #cbd5e1;
+  --scrollbar-thumb-hover: #94a3b8;
+
+  /* Status badges */
+  --status-online-bg: #ecfdf5; /* emerald-50 */
+  --status-online-text: #059669; /* emerald-600 */
+  --status-online-border: #d1fae5; /* emerald-100 */
+
+  --status-offline-bg: #fef2f2; /* red-50 */
+  --status-offline-text: #dc2626; /* red-600 */
+  --status-offline-border: #fee2e2; /* red-100 */
+
+  /* Selection */
+  --selection-bg: #ccfbf1; /* teal-100 */
+  --selection-text: #0f172a;
+
+  /* Toggle */
+  --toggle-bg: #e2e8f0;
+  --toggle-bg-active: #0f172a;
+  --toggle-thumb: #ffffff;
+
+  /* Table */
+  --table-header-bg: #f1f5f9;
+  --table-row-hover: #f8fafc;
+  --table-row-alt: #f8fafc;
+  --table-border: #e2e8f0;
+
+  /* StatusBar - Dark footer even in light mode for contrast anchor */
+  --statusbar-bg: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  --statusbar-bg-solid: #1e293b;
+  --statusbar-text: #e2e8f0;
+  --statusbar-text-muted: #94a3b8;
+  --statusbar-border: rgba(255, 255, 255, 0.05);
+  --statusbar-btn-bg: rgba(255, 255, 255, 0.05);
+  --statusbar-btn-hover: rgba(255, 255, 255, 0.1);
+}
+
+/* ===== Dark Theme ===== */
+.dark {
+  --bg-primary: #0c1222;
+  --bg-secondary: #131d2e;
+  --bg-tertiary: #0f1a2a;
+  --bg-elevated: #172135;
+
+  --text-primary: #e1e7ef;
+  --text-secondary: #b8c5d4;
+  --text-tertiary: #7e93a8;
+  --text-muted: #546b82;
+  --text-inverse: #0c1222;
+
+  --border-primary: rgba(255, 255, 255, 0.08);
+  --border-secondary: rgba(255, 255, 255, 0.04);
+  --border-subtle: rgba(255, 255, 255, 0.03);
+
+  --accent: #34d399;
+  --accent-hover: #10b981;
+  --accent-light: #6ee7b7;
+  --accent-bg: rgba(52, 211, 153, 0.08);
+  --accent-text: #34d399;
+  --accent-glow: rgba(52, 211, 153, 0.2);
+
+  --card-bg: #131d2e;
+  --card-border: rgba(255, 255, 255, 0.06);
+  --card-hover-border: rgba(52, 211, 153, 0.35);
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.2), 0 1px 2px rgba(0, 0, 0, 0.1);
+  --card-hover-shadow:
+    0 8px 25px rgba(52, 211, 153, 0.08), 0 4px 10px rgba(0, 0, 0, 0.15);
+
+  --input-bg: #0f1a2a;
+  --input-border: rgba(255, 255, 255, 0.1);
+  --input-focus-ring: rgba(52, 211, 153, 0.3);
+  --input-focus-border: #34d399;
+  --input-placeholder: #546b82;
+
+  --modal-overlay: rgba(0, 0, 0, 0.65);
+
+  --cart-bg: #0f1a2a;
+  --cart-item-bg: rgba(255, 255, 255, 0.03);
+  --cart-item-border: rgba(255, 255, 255, 0.05);
+  --cart-item-hover: rgba(255, 255, 255, 0.06);
+
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.2);
+
+  --status-online-bg: rgba(52, 211, 153, 0.1);
+  --status-online-text: #34d399;
+  --status-online-border: rgba(52, 211, 153, 0.2);
+  --status-offline-bg: rgba(239, 68, 68, 0.08);
+  --status-offline-text: #f87171;
+  --status-offline-border: rgba(239, 68, 68, 0.15);
+
+  --selection-bg: rgba(52, 211, 153, 0.2);
+  --selection-text: #e1e7ef;
+
+  --toggle-bg: rgba(255, 255, 255, 0.1);
+  --toggle-bg-active: #10b981;
+  --toggle-thumb: #ffffff;
+
+  --table-header-bg: rgba(255, 255, 255, 0.04);
+  --table-row-hover: rgba(255, 255, 255, 0.04);
+  --table-row-alt: rgba(255, 255, 255, 0.02);
+  --table-border: rgba(255, 255, 255, 0.06);
+
+  --statusbar-bg: linear-gradient(135deg, #0c1222 0%, #0a0f1c 100%);
+  --statusbar-bg-solid: #0c1222;
+  --statusbar-text: #d9e2ec;
+  --statusbar-text-muted: #627d98;
+  --statusbar-border: rgba(255, 255, 255, 0.04);
+  --statusbar-btn-bg: rgba(255, 255, 255, 0.04);
+  --statusbar-btn-hover: rgba(255, 255, 255, 0.08);
+
+  --fiscal-glow: rgba(59, 130, 246, 0.2);
+  --internal-glow: rgba(52, 211, 153, 0.2);
+}
+
+/* stylelint-disable at-rule-no-unknown */
+/* ===== Tailwind v4 Theme Tokens ===== */
+@theme inline {
+  --color-accent: var(--accent);
+  --color-accent-dark: var(--accent-hover);
+  --color-accent-light: var(--accent-light);
+  --color-fiscal: var(--fiscal);
+  --color-fiscal-hover: var(--fiscal-hover);
+  --color-internal: var(--internal);
+  --color-internal-hover: var(--internal-hover);
+  --color-danger: var(--danger);
+  --color-danger-hover: var(--danger-hover);
+  --color-warning: var(--warning);
+  --color-success: var(--success);
+}
+
+/* ===== Base Styles ===== */
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family:
+    var(--font-inter),
+    system-ui,
+    -apple-system,
+    sans-serif;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background: var(--selection-bg);
+  color: var(--selection-text);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-dot {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.35s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out both;
+}
+
+.animate-slide-in {
+  animation: slideInRight 0.25s ease-out both;
+}
+
+/* ===== Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+/* ===== Tabular Nums ===== */
+.font-tabular {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* ================================================================
+   COMPONENT STYLES
+   ================================================================ */
+
+/* ===== Input Fields ===== */
+.input-field {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border-radius: var(--card-radius);
+  border: 1.5px solid var(--input-border);
+  background: var(--input-bg);
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  transition: all 0.2s ease;
+  outline: none;
+}
+
+.input-field::placeholder {
+  color: var(--input-placeholder);
+}
+
+.input-field:focus {
+  border-color: var(--input-focus-border);
+  box-shadow: 0 0 0 3px var(--input-focus-ring);
+}
+
+.input-field:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ===== Product Card ===== */
+.product-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem;
+  border-radius: var(--card-radius);
+  border: 1.5px solid var(--card-border);
+  background: var(--card-bg);
+  box-shadow: var(--card-shadow);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  animation: fadeInUp 0.4s ease-out both;
+}
+
+.product-card:hover {
+  border-color: var(--card-hover-border);
+  box-shadow: var(--card-hover-shadow);
+  transform: translateY(-2px);
+}
+
+.product-card:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.product-card--disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.4);
+}
+
+.product-card--disabled:hover {
+  transform: none;
+  box-shadow: var(--card-shadow);
+  border-color: var(--card-border);
+}
+
+.product-card__barcode {
+  font-size: 0.7rem;
+  font-family: var(--font-jetbrains-mono), monospace;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+}
+
+.product-card__name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-top: 0.375rem;
+  line-height: 1.3;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.product-card__price {
+  font-size: 1.125rem;
+  font-weight: 800;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
+.product-card__stock {
+  font-size: 0.7rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg-tertiary);
+  padding: 0.125rem 0.5rem;
+  border-radius: 100px;
+}
+
+.product-card__stock--low {
+  color: var(--warning);
+  background: rgba(245, 158, 11, 0.1);
+}
+
+.product-card__low-badge {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--warning);
+  box-shadow: 0 0 6px rgba(245, 158, 11, 0.5);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+/* ===== Buttons ===== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--card-radius);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-fiscal {
+  background: linear-gradient(135deg, var(--fiscal) 0%, #1d6cf0 100%);
+  color: white;
+  box-shadow: 0 2px 8px var(--fiscal-glow);
+}
+
+.btn-fiscal:hover:not(:disabled) {
+  box-shadow: 0 4px 16px var(--fiscal-glow);
+  transform: translateY(-1px);
+}
+
+.btn-internal {
+  background: linear-gradient(135deg, var(--internal) 0%, #059669 100%);
+  color: white;
+  box-shadow: 0 2px 8px var(--internal-glow);
+}
+
+.btn-internal:hover:not(:disabled) {
+  box-shadow: 0 4px 16px var(--internal-glow);
+  transform: translateY(-1px);
+}
+
+.btn-danger {
+  background: linear-gradient(135deg, var(--danger) 0%, #dc2626 100%);
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.3);
+}
+
+.btn-ghost {
+  color: var(--text-tertiary);
+  background: transparent;
+}
+
+.btn-ghost:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+/* ===== Status Badges ===== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.3rem 0.75rem;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.status-online {
+  background: var(--status-online-bg);
+  color: var(--status-online-text);
+  border: 1px solid var(--status-online-border);
+}
+
+.status-offline {
+  background: var(--status-offline-bg);
+  color: var(--status-offline-text);
+  border: 1px solid var(--status-offline-border);
+}
+
+/* ===== Cart Item ===== */
+.cart-item {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem;
+  border-radius: 10px;
+  background: var(--cart-item-bg);
+  border: 1px solid var(--cart-item-border);
+  transition: all 0.2s ease;
+  animation: slideInRight 0.25s ease-out both;
+}
+
+.cart-item:hover {
+  background: var(--cart-item-hover);
+  border-color: var(--border-primary);
+}
+
+/* ===== Cart Qty Button ===== */
+.qty-btn {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid var(--border-primary);
+  background: var(--bg-secondary);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qty-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-bg);
+}
+
+.qty-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* ===== Admin Table ===== */
+.admin-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.875rem;
+}
+
+.admin-table thead th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-tertiary);
+  background: var(--table-header-bg);
+  border-bottom: 2px solid var(--table-border);
+}
+
+.admin-table thead th:first-child {
+  border-radius: var(--card-radius) 0 0 0;
+}
+
+.admin-table thead th:last-child {
+  border-radius: 0 var(--card-radius) 0 0;
+}
+
+.admin-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.admin-table tbody tr:nth-child(even) {
+  background: var(--table-row-alt);
+}
+
+.admin-table tbody tr:hover {
+  background: var(--table-row-hover);
+}
+
+.admin-table tbody td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--table-border);
+  color: var(--text-secondary);
+}
+
+.admin-table tbody td:first-child {
+  font-family: var(--font-jetbrains-mono), monospace;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ===== Theme Toggle ===== */
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+.theme-toggle__track {
+  display: flex;
+  align-items: center;
+  width: 44px;
+  height: 24px;
+  border-radius: 9999px;
+  background: var(--toggle-bg);
+  padding: 2px;
+  transition: background 0.3s ease;
+}
+
+.theme-toggle.is-dark .theme-toggle__track {
+  background: var(--toggle-bg-active);
+}
+
+.theme-toggle__thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 9999px;
+  background: var(--toggle-thumb);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s cubic-bezier(0.68, -0.3, 0.32, 1.3);
+  color: #f59e0b;
+}
+
+.theme-toggle.is-dark .theme-toggle__thumb {
+  transform: translateX(20px);
+  color: #7dd3fc;
+}
+
+/* Icon visibility: CSS handles show/hide to avoid React hydration mismatches */
+.theme-toggle__icon {
+  position: absolute;
+}
+.theme-toggle__icon--moon {
+  display: none;
+}
+.theme-toggle.is-dark .theme-toggle__icon--sun {
+  display: none;
+}
+.theme-toggle.is-dark .theme-toggle__icon--moon {
+  display: block;
+}
+
+/* ===== Glass / Elevated Panel ===== */
+.glass-panel {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--card-radius);
+  box-shadow: var(--card-shadow);
+}
+
+/* ===== Utility: Accent dot ===== */
+.dot-online {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--success);
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.dot-offline {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--danger);
+  box-shadow: 0 0 6px rgba(239, 68, 68, 0.3);
+}

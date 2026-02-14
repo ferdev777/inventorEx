@@ -1,0 +1,14 @@
+{
+  "targetDefaults": {
+    "build": {
+      "cache": true
+    },
+    "lint": {
+      "cache": true
+    }
+  },
+  "defaultBase": "main",
+  "installation": {
+    "version": "22.5.0"
+  }
+}
