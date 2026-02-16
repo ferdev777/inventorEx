@@ -7,6 +7,7 @@ import { searchProducts } from '@/lib/api/client';
 
 interface ProductPanelProps {
   onAddToCart: (product: ProductView) => void;
+  disableFocus?: boolean;
 }
 
 function formatCurrency(amount: number): string {
@@ -17,7 +18,7 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-export function ProductPanel({ onAddToCart }: ProductPanelProps) {
+export function ProductPanel({ onAddToCart, disableFocus = false }: ProductPanelProps) {
   const [query, setQuery] = useState('');
   const [products, setProducts] = useState<ProductView[]>([]);
   const [loading, setLoading] = useState(false);
@@ -26,6 +27,8 @@ export function ProductPanel({ onAddToCart }: ProductPanelProps) {
 
   // Auto-focus search input on mount (optimized for barcode scanners)
   useEffect(() => {
+    if (disableFocus) return;
+
     inputRef.current?.focus();
 
     const handleClick = () => {
@@ -33,7 +36,7 @@ export function ProductPanel({ onAddToCart }: ProductPanelProps) {
     };
     document.addEventListener('click', handleClick);
     return () => document.removeEventListener('click', handleClick);
-  }, []);
+  }, [disableFocus]);
 
   // Load all products initially
   useEffect(() => {

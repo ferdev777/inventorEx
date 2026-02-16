@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { Plus, Search, Edit, Trash, TrendingUp, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { ConfirmationModal } from '@/components/ui/ConfirmationModal';
 import { 
   getAllSuppliers, 
   createSupplier, 
@@ -19,7 +21,20 @@ export function SupplierManager() {
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null);
   const [isPriceModalOpen, setIsPriceModalOpen] = useState(false);
   const [priceUpdateSupplier, setPriceUpdateSupplier] = useState<Supplier | null>(null);
-
+  
+  const [confirmation, setConfirmation] = useState<{
+    isOpen: boolean;
+    title: string;
+    description: string;
+    variant: 'danger' | 'default';
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    description: '',
+    variant: 'default',
+    onConfirm: () => {},
+  });
   const fetchSuppliers = async () => {
     try {
       const data = await getAllSuppliers();
@@ -27,12 +42,12 @@ export function SupplierManager() {
     } catch (error) {
       console.error('Error fetching suppliers:', error);
     } finally {
-      setLoading(false);
+      // setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSuppliers();
+    fetchSuppliers().then(() => setLoading(false));
   }, []);
 
   const filteredSuppliers = suppliers.filter(s => 
@@ -40,14 +55,24 @@ export function SupplierManager() {
     s.contactName?.toLowerCase().includes(query.toLowerCase())
   );
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('¿Estás seguro de eliminar este proveedor?')) return;
-    try {
-      await deleteSupplier(id);
-      fetchSuppliers();
-    } catch {
-      alert('Error eliminando proveedor');
-    }
+  const handleDelete = (id: number) => {
+    setConfirmation({
+      isOpen: true,
+      title: 'Eliminar Proveedor',
+      description: '¿Estás seguro de que deseas eliminar este proveedor? Esta acción no se puede deshacer.',
+      variant: 'danger',
+      onConfirm: async () => {
+        try {
+          await deleteSupplier(id);
+          toast.success('Proveedor eliminado correctamente');
+          fetchSuppliers();
+        } catch {
+          toast.error('Error al eliminar el proveedor');
+          throw new Error('Failed to delete'); // Rethrow to keep modal open
+        }
+        // No manual setConfirmation(false) here, ConfirmationModal handles it
+      },
+    });
   };
 
   return (
@@ -145,8 +170,18 @@ export function SupplierManager() {
         <PriceUpdateModal
           supplier={priceUpdateSupplier}
           onClose={() => setIsPriceModalOpen(false)}
+          onShowConfirmation={(conf) => setConfirmation(conf)}
         />
       )}
+
+      <ConfirmationModal
+        isOpen={confirmation.isOpen}
+        onClose={() => setConfirmation(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={confirmation.onConfirm}
+        title={confirmation.title}
+        description={confirmation.description}
+        variant={confirmation.variant}
+      />
     </div>
   );
 }
@@ -175,12 +210,14 @@ function SupplierFormModal({ supplier, onClose }: { supplier: Supplier | null, o
     try {
       if (supplier) {
         await updateSupplier(supplier.id, formData);
+        toast.success('Proveedor actualizado correctamente');
       } else {
         await createSupplier(formData);
+        toast.success('Proveedor creado correctamente');
       }
       onClose(true);
     } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Error desconocido');
+      toast.error(err instanceof Error ? err.message : 'Error desconocido');
     } finally {
       setLoading(false);
     }
@@ -262,7 +299,23 @@ function SupplierFormModal({ supplier, onClose }: { supplier: Supplier | null, o
   );
 }
 
-function PriceUpdateModal({ supplier, onClose }: { supplier: Supplier, onClose: () => void }) {
+interface ConfirmationState {
+  isOpen: boolean;
+  title: string;
+  description: string;
+  variant: 'danger' | 'default';
+  onConfirm: () => void | Promise<void>;
+}
+
+function PriceUpdateModal({ 
+  supplier, 
+  onClose,
+  onShowConfirmation
+}: { 
+  supplier: Supplier, 
+  onClose: () => void,
+  onShowConfirmation: (conf: ConfirmationState) => void
+}) {
   const [percentage, setPercentage] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -271,18 +324,27 @@ function PriceUpdateModal({ supplier, onClose }: { supplier: Supplier, onClose: 
     const pct = parseFloat(percentage);
     if (isNaN(pct)) return;
 
-    if (!confirm(`¿Estás seguro de aumentar los precios de ${supplier.name} en un ${pct}%?`)) return;
-
-    setLoading(true);
-    try {
-      await bulkUpdateSupplierPrices(supplier.id, pct);
-      alert('Precios actualizados correctamente');
-      onClose();
-    } catch (err: unknown) {
-      alert(err instanceof Error ? err.message : 'Error desconocido');
-    } finally {
-      setLoading(false);
-    }
+    onShowConfirmation({
+      isOpen: true,
+      title: 'Actualizar Precios',
+      description: `¿Estás seguro de aumentar los precios de ${supplier.name} en un ${pct}%?`,
+      variant: 'default',
+      onConfirm: async () => {
+        setLoading(true); // Keep local loading for the price modal if it were visible, but it's behind
+        try {
+          await bulkUpdateSupplierPrices(supplier.id, pct);
+          toast.success('Precios actualizados correctamente');
+          onClose(); // Close price modal immediately? Or wait? 
+          // If we close price modal immediately, user sees confirmation modal success state.
+        } catch (err: unknown) {
+          toast.error(err instanceof Error ? err.message : 'Error desconocido');
+          throw err;
+        } finally {
+          setLoading(false);
+          // ConfirmationModal will close itself
+        }
+      }
+    });
   };
 
   return (

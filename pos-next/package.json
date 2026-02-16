@@ -13,12 +13,15 @@
     "@supabase/ssr": "^0.8.0",
     "@supabase/supabase-js": "^2.95.3",
     "@types/nodemailer": "^7.0.9",
+    "clsx": "^2.1.1",
     "lucide-react": "^0.563.0",
     "next": "16.1.6",
     "nodemailer": "^8.0.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "recharts": "^3.7.0",
+    "sonner": "^2.0.7",
+    "tailwind-merge": "^3.4.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {

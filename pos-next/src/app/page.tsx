@@ -9,6 +9,8 @@ import { ProductPanel } from '@/components/ProductPanel';
 import { CartPanel } from '@/components/CartPanel';
 import { ResultModal } from '@/components/ResultModal';
 import { AdminDashboard } from '@/components/admin/AdminDashboard';
+import { QuantitySelector } from '@/components/QuantitySelector';
+import { toast } from 'sonner';
 
 export default function POSPage() {
   // --- State ---
@@ -22,6 +24,10 @@ export default function POSPage() {
   const [showAdmin, setShowAdmin] = useState(false);
   const [selectedPeriod, setSelectedPeriod] = useState<'day' | 'week' | 'month' | 'year'>('day');
   const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+
+  // --- Quantity Selector State ---
+  const [selectedProductForQty, setSelectedProductForQty] = useState<ProductView | null>(null);
+  const [qtyInModal, setQtyInModal] = useState(1);
 
   // --- Effects ---
   useEffect(() => {
@@ -38,20 +44,69 @@ export default function POSPage() {
   }, [selectedPeriod]);
 
   // --- Cart Operations ---
-  const handleAddToCart = useCallback((product: ProductView) => {
+  
+  const confirmAddToCart = useCallback((product: ProductView, quantity: number) => {
     setCart((prev) => {
       const existing = prev.find((item) => item.product.id === product.id);
       if (existing) {
-        if (existing.quantity >= product.stock) return prev;
+        if (existing.quantity >= product.stock) {
+           toast.error('No hay suficiente stock disponible');
+           return prev;
+        }
+        // Calcular nueva cantidad total
+        const newTotal = existing.quantity + quantity;
+        if (newTotal > product.stock) {
+            toast.warning(`Solo se agregaron ${product.stock - existing.quantity} unidades (Stock máximo alcanzado)`);
+            return prev.map((item) =>
+                item.product.id === product.id
+                  ? { ...item, quantity: product.stock }
+                  : item
+              );
+        }
+        
+        toast.success(`Se agregaron ${quantity} unidades de ${product.name}`);
         return prev.map((item) =>
           item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + quantity }
             : item,
         );
       }
-      return [...prev, { product, quantity: 1 }];
+      toast.success(`Agregado: ${product.name} (x${quantity})`);
+      return [...prev, { product, quantity }];
     });
+    // Cerrar modal y resetear
+    setSelectedProductForQty(null);
+    setQtyInModal(1);
+    // Enfocar input de búsqueda de nuevo si es posible (opcional)
+    document.getElementById('product-search')?.focus();
   }, []);
+
+  const handleAddToCart = useCallback((product: ProductView) => {
+    if (selectedProductForQty && selectedProductForQty.id === product.id) {
+        // Mismo producto escaneado -> incrementar cantidad
+        setQtyInModal(prev => {
+            const newQty = prev + 1;
+            if (newQty > product.stock) {
+                toast.error('Stock máximo alcanzado en selección');
+                return prev;
+            }
+            return newQty;
+        });
+    } else {
+        // Otro producto escaneado mientras había uno abierto
+        if (selectedProductForQty) {
+            // Confirmar y agregar el anterior antes de cambiar (comportamiento de "cola")
+            // O, para simplificar y evitar errores, simplemente cambiamos al nuevo
+            // Si el usuario escanea A, luego B, asumimos que A se canceló o se confirma? 
+            // La regla "si se pasa 2 veces... se añada un 2" implica flujo rápido.
+            // Vamos a confirmar el anterior con la cantidad actual y abrir el nuevo.
+            confirmAddToCart(selectedProductForQty, qtyInModal);
+        }
+        // Abrir modal para el nuevo
+        setSelectedProductForQty(product);
+        setQtyInModal(1);
+    }
+  }, [selectedProductForQty, qtyInModal, confirmAddToCart]);
 
   const handleUpdateQty = useCallback((productId: number, delta: number) => {
     setCart((prev) =>
@@ -131,7 +186,10 @@ export default function POSPage() {
       <div className="flex flex-1 overflow-hidden relative">
         {/* Product Panel (Left) */}
         <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: 'var(--bg-tertiary)' }}>
-          <ProductPanel onAddToCart={handleAddToCart} />
+          <ProductPanel 
+            onAddToCart={handleAddToCart} 
+            disableFocus={!!selectedProductForQty || !!saleResult || isMobileCartOpen}
+          />
         </div>
 
         {/* Cart Panel (Right - Desktop) */}
@@ -187,6 +245,20 @@ export default function POSPage() {
         error={saleError}
         onClose={handleCloseModal}
       />
+
+      {/* Quantity Selector Modal */}
+      {selectedProductForQty && (
+        <QuantitySelector
+          product={selectedProductForQty}
+          initialQty={qtyInModal}
+          onConfirm={(qty) => confirmAddToCart(selectedProductForQty, qty)}
+          onCancel={() => {
+              setSelectedProductForQty(null);
+              setQtyInModal(1);
+              document.getElementById('product-search')?.focus();
+          }}
+        />
+      )}
     </div>
   );
 }
