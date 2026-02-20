@@ -126,6 +126,10 @@ export default function POSPage() {
     setCart((prev) => prev.filter((item) => item.product.id !== productId));
   }, []);
 
+  const handleClearCart = useCallback(() => {
+    setCart([]);
+  }, []);
+
   // --- Checkout ---
   const handleCheckout = useCallback(
     async (type: SaleType) => {
@@ -213,6 +217,7 @@ export default function POSPage() {
               items={cart}
               onUpdateQty={handleUpdateQty}
               onRemove={handleRemove}
+              onClearCart={handleClearCart}
               onCheckout={handleCheckout}
               isProcessing={isProcessing}
               selectedClient={selectedClient}

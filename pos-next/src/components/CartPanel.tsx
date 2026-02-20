@@ -1,6 +1,7 @@
 'use client';
 
-import { ShoppingCart, Minus, Plus, Trash2, Receipt, ArrowRight, Loader2 } from 'lucide-react';
+import { useState } from 'react';
+import { ShoppingCart, Minus, Plus, Trash2, Receipt, ArrowRight, Loader2, Coins, X } from 'lucide-react';
 import type { CartItem, SaleType, Client } from '@/lib/types';
 import { ClientSelector } from '@/components/ClientSelector';
 
@@ -8,6 +9,7 @@ interface CartPanelProps {
   items: CartItem[];
   onUpdateQty: (productId: number, delta: number) => void;
   onRemove: (productId: number) => void;
+  onClearCart: () => void;
   onCheckout: (type: SaleType) => void;
   isProcessing: boolean;
   selectedClient: Client | null;
@@ -22,12 +24,16 @@ function formatCurrency(amount: number): string {
   }).format(amount);
 }
 
-export function CartPanel({ items, onUpdateQty, onRemove, onCheckout, isProcessing, selectedClient, onSelectClient }: CartPanelProps) {
+export function CartPanel({ items, onUpdateQty, onRemove, onClearCart, onCheckout, isProcessing, selectedClient, onSelectClient }: CartPanelProps) {
+  const [amountPaid, setAmountPaid] = useState<string>('');
+
   const total = items.reduce(
     (sum, item) => sum + Number(item.product.price) * item.quantity,
     0,
   );
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
+
+  const numericPaid = parseFloat(amountPaid) || 0;
 
   return (
     <div
@@ -51,15 +57,33 @@ export function CartPanel({ items, onUpdateQty, onRemove, onCheckout, isProcessi
           </div>
           <h2 className="font-bold text-base" style={{ color: 'var(--text-primary)' }}>Ticket</h2>
         </div>
-        <span
-          className="text-xs font-medium px-2.5 py-1 rounded-full"
-          style={{
-            backgroundColor: 'var(--accent-bg)',
-            color: 'var(--accent-text)',
-          }}
-        >
-          {totalItems} {totalItems === 1 ? 'item' : 'items'}
-        </span>
+        <div className="flex items-center gap-2">
+          {items.length > 0 && (
+            <button
+              onClick={onClearCart}
+              title="Vaciar carrito"
+              className="flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full transition-all hover:scale-105 active:scale-95"
+              style={{
+                backgroundColor: 'rgba(239,68,68,0.1)',
+                color: 'var(--danger)',
+                border: '1px solid rgba(239,68,68,0.2)',
+              }}
+              id="btn-clear-cart"
+            >
+              <X className="w-3 h-3" />
+              Vaciar
+            </button>
+          )}
+          <span
+            className="text-xs font-medium px-2.5 py-1 rounded-full"
+            style={{
+              backgroundColor: 'var(--accent-bg)',
+              color: 'var(--accent-text)',
+            }}
+          >
+            {totalItems} {totalItems === 1 ? 'item' : 'items'}
+          </span>
+        </div>
       </div>
 
       {/* Cart Items List */}
@@ -151,7 +175,7 @@ export function CartPanel({ items, onUpdateQty, onRemove, onCheckout, isProcessi
 
       {/* Total & Checkout */}
       <div
-        className="p-5 space-y-4"
+        className="p-5 space-y-5"
         style={{ borderTop: '1px solid var(--border-primary)' }}
       >
         {/* Total Display */}
@@ -169,6 +193,44 @@ export function CartPanel({ items, onUpdateQty, onRemove, onCheckout, isProcessi
             {formatCurrency(total)}
           </span>
         </div>
+
+        {/* Change Calculation Section */}
+        {total > 0 && (
+          <div className="space-y-3 pt-2" style={{ borderTop: '1px dashed var(--border-secondary)' }}>
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <Coins className="w-4 h-4 text-[var(--text-tertiary)]" />
+                <span className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
+                  Paga con
+                </span>
+              </div>
+              <div className="relative flex-1 max-w-[140px]">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm font-bold text-[var(--text-muted)]">$</span>
+                <input
+                  type="number"
+                  value={amountPaid}
+                  onChange={(e) => setAmountPaid(e.target.value)}
+                  placeholder="0.00"
+                  className="input-field py-1.5 pl-7 text-right font-bold font-tabular"
+                  onWheel={(e) => e.currentTarget.blur()}
+                />
+              </div>
+            </div>
+
+            {numericPaid > 0 && (
+              <div className="flex items-center justify-between animate-fade-in">
+                <span className="text-xs font-semibold text-[var(--text-tertiary)] uppercase tracking-wider">
+                  {numericPaid < total ? 'Falta' : 'Su vuelto'}
+                </span>
+                <span 
+                  className={`text-xl font-bold font-tabular ${numericPaid < total ? 'text-[var(--danger)]' : 'text-[var(--accent)]'}`}
+                >
+                  {formatCurrency(Math.abs(numericPaid - total))}
+                </span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Checkout Buttons */}
         <div className="grid grid-cols-1 gap-2.5">

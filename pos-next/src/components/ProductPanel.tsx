@@ -31,7 +31,11 @@ export function ProductPanel({ onAddToCart, disableFocus = false }: ProductPanel
 
     inputRef.current?.focus();
 
-    const handleClick = () => {
+    const handleClick = (e: MouseEvent) => {
+      // Don't steal focus if the user clicked on an interactive element
+      const target = e.target as HTMLElement;
+      const isInteractiveElement = target.closest('input, textarea, select, button, [role="combobox"], [contenteditable]');
+      if (isInteractiveElement) return;
       setTimeout(() => inputRef.current?.focus(), 100);
     };
     document.addEventListener('click', handleClick);
