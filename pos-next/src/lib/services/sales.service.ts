@@ -101,6 +101,29 @@ export async function createSale(dto: CreateSaleInput): Promise<SaleResult> {
 
   total = parseFloat(total.toFixed(2));
 
+  // Resolve invoice type if FISCAL
+  let cbteTipo: number | null = null;
+  let ptoVta: number | null = null;
+  let docTipo: number | null = null;
+  let docNro: string | null = null;
+  let fiscalStatus: 'PENDING' | 'COMPLETED' | 'ERROR' | null = null;
+  
+  if (type === 'FISCAL') {
+    fiscalStatus = 'PENDING';
+    ptoVta = process.env.AFIP_POS ? parseInt(process.env.AFIP_POS) : 1;
+    
+    // Lazy load AFIP resolvers
+    const { resolveInvoiceType } = await import('@/lib/afip/invoice-resolver');
+    
+    const taxCondition = (process.env.AFIP_TAX_CONDITION as 'RI' | 'MONO') || 'MONO';
+    // We don't have a clients table yet, pass null to use Consumidor Final
+    const resolution = resolveInvoiceType(null, taxCondition);
+    
+    cbteTipo = resolution.cbteTipo;
+    docTipo = resolution.docTipo;
+    docNro = resolution.docNro;
+  }
+
   // Insert sale
   const { data: sale, error: saleError } = await supabase
     .from('sales')
@@ -110,7 +133,12 @@ export async function createSale(dto: CreateSaleInput): Promise<SaleResult> {
       cae: null,
       vto_cae: null,
       invoice_number: null,
-      client_id: clientId || null,
+      fiscal_status: fiscalStatus,
+      cbte_tipo: cbteTipo,
+      pto_vta: ptoVta,
+      doc_tipo: docTipo,
+      doc_nro: docNro,
+      afip_error: null,
     })
     .select()
     .single();
@@ -137,82 +165,71 @@ export async function createSale(dto: CreateSaleInput): Promise<SaleResult> {
   // --- Step 5: If FISCAL, AFIP integration ---
   if (type === 'FISCAL') {
     try {
-      const { getAfip } = await import('@/lib/afip');
+      const { getAfip } = await import('@/lib/afip/client');
+      const { buildVoucherPayload } = await import('@/lib/afip/voucher-builder');
       const afip = getAfip();
       
       console.log(`[Sales] Starting FISCAL sale processing for Sale #${saleRow.id}`);
 
-      // 1. Get POS and Invoice Type
-      const POS = process.env.AFIP_POS ? parseInt(process.env.AFIP_POS) : 1;
-      const CBTE_TIPO = 11; // Factura C (default for now)
-
-      // 2. Get Last Voucher Number
-      const lastVoucher = await afip.ElectronicBilling.getLastVoucher(POS, CBTE_TIPO);
+      // 1. Get Last Voucher Number
+      const lastVoucher = await afip.ElectronicBilling.getLastVoucher(ptoVta!, cbteTipo!);
       const nextVoucher = lastVoucher + 1;
 
-      console.log(`[Sales] Next Voucher: ${nextVoucher} (POS: ${POS}, Type: ${CBTE_TIPO})`);
+      console.log(`[Sales] Next Voucher: ${nextVoucher} (POS: ${ptoVta}, Type: ${cbteTipo})`);
 
-      // 3. Prepare Payload
-      // Format date as YYYYMMDD
-      const today = new Date();
-      const cbteFch = today.toISOString().slice(0, 10).replace(/-/g, '');
-      const impTotal = parseFloat(total.toFixed(2));
+      // 2. Prepare Payload using builder
+      const payload = buildVoucherPayload({
+        pos: ptoVta!,
+        cbteTipo: cbteTipo!,
+        docTipo: docTipo!,
+        docNro: docNro!,
+        nextVoucher: nextVoucher,
+        total: parseFloat(total.toFixed(2))
+      });
 
-      const data = {
-        'CantReg': 1,
-        'PtoVta': POS,
-        'CbteTipo': CBTE_TIPO,
-        'Concepto': 1, // 1: Productos, 2: Servicios, 3: Productos y Servicios
-        'DocTipo': 99, // 99: Consumidor Final (can be parameterized later)
-        'DocNro': 0,   // 0 for Consumidor Final < $344.488 (chk limits)
-        'CbteDesde': nextVoucher,
-        'CbteHasta': nextVoucher,
-        'CbteFch': parseInt(cbteFch),
-        'ImpTotal': impTotal,
-        'ImpTotConc': 0,
-        'ImpNeto': impTotal, // For Factura C, Net = Total (no discriminated VAT)
-        'ImpOpEx': 0,
-        'ImpTrib': 0,
-        'ImpIVA': 0,
-        'FchServDesde': null,
-        'FchServHasta': null,
-        'FchVtoPago': null,
-        'MonId': 'PES',
-        'MonCotiz': 1,
-      };
-
-      // 4. Create Voucher
-      const res = await afip.ElectronicBilling.createVoucher(data);
+      // 3. Create Voucher
+      const res = await afip.ElectronicBilling.createVoucher(payload);
       
       console.log('[Sales] AFIP Response:', res);
 
-      // 5. Update Sale with CAE
+      // 4. Update Sale with CAE
       const { error: updateError } = await supabase
         .from('sales')
         .update({
           cae: res['CAE'],
           vto_cae: res['CAEFchVto'],
           invoice_number: nextVoucher,
-          updated_at: new Date().toISOString() // Should add updated_at to table if missing, but schema had created_at. Assuming ok.
+          fiscal_status: 'COMPLETED',
         })
         .eq('id', saleRow.id);
 
       if (updateError) {
-         console.error('[Sales] Error saving CAE to DB:', updateError);
-         // Don't throw here, as the sale IS valid in AFIP. Just log.
+         console.error('[Sales] Error saving CAE to DB (CRITICAL):', res['CAE'], updateError);
+         // Do not throw; AFIP transaction succeeded.
       }
 
       // Update local object for return
       saleRow.cae = res['CAE'];
       saleRow.vto_cae = res['CAEFchVto'];
       saleRow.invoice_number = nextVoucher;
+      saleRow.fiscal_status = 'COMPLETED';
 
     } catch (error) {
        console.error('[Sales] AFIP Error:', error);
-       // We should flag the sale as "Error Fiscal" or similar in DB ideally. 
-       // For now, rethrow or allow partial success? 
-       // Rethrowing ensures the frontend knows something went wrong with the "Fiscal" part.
-       throw new Error(`Error facturando en AFIP: ${error instanceof Error ? error.message : 'Unknown error'}`);
+       
+       const errMsg = error instanceof Error ? error.message : String(error);
+       
+       // Update sale to ERROR
+       await supabase
+         .from('sales')
+         .update({
+           fiscal_status: 'ERROR',
+           afip_error: errMsg,
+         })
+         .eq('id', saleRow.id);
+         
+       saleRow.fiscal_status = 'ERROR';
+       saleRow.afip_error = errMsg;
     }
   } else {
     console.log(`[Sales] INTERNAL sale #${saleRow.id} created | Total: $${total}`);
@@ -225,6 +242,9 @@ export async function createSale(dto: CreateSaleInput): Promise<SaleResult> {
     cae: saleRow.cae,
     vtoCae: saleRow.vto_cae,
     invoiceNumber: saleRow.invoice_number,
+    fiscalStatus: saleRow.fiscal_status ?? null,
+    cbteTipo: saleRow.cbte_tipo ?? null,
+    ptoVta: saleRow.pto_vta ?? null,
     createdAt: saleRow.created_at,
     items: saleItemsData.map((item) => ({
       productName: item.productName,
@@ -264,6 +284,9 @@ export async function findSaleById(id: number): Promise<SaleResult | null> {
     cae: saleRow.cae,
     vtoCae: saleRow.vto_cae,
     invoiceNumber: saleRow.invoice_number,
+    fiscalStatus: saleRow.fiscal_status ?? null,
+    cbteTipo: saleRow.cbte_tipo ?? null,
+    ptoVta: saleRow.pto_vta ?? null,
     createdAt: saleRow.created_at,
     items: ((saleItems ?? []) as unknown as SaleItemWithProduct[]).map((item) => ({
       productName: item.products?.name ?? 'Producto eliminado',
@@ -314,6 +337,9 @@ export async function getRecentSales(limit: number = 20): Promise<SaleResult[]> 
     cae: sale.cae,
     vtoCae: sale.vto_cae,
     invoiceNumber: sale.invoice_number,
+    fiscalStatus: sale.fiscal_status ?? null,
+    cbteTipo: sale.cbte_tipo ?? null,
+    ptoVta: sale.pto_vta ?? null,
     createdAt: sale.created_at,
     items: (itemsBySaleId.get(sale.id) ?? []).map((item) => ({
       productName: item.products?.name ?? 'Producto eliminado',

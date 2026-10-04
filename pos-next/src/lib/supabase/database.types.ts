@@ -36,6 +36,12 @@ export interface Database {
           cae: string | null;
           vto_cae: string | null;
           invoice_number: number | null;
+          fiscal_status: 'PENDING' | 'COMPLETED' | 'ERROR' | null;
+          cbte_tipo: number | null;
+          pto_vta: number | null;
+          doc_tipo: number | null;
+          doc_nro: string | null;
+          afip_error: string | null;
           created_at: string;
         };
         Insert: Omit<Database['public']['Tables']['sales']['Row'], 'id' | 'created_at'> & {

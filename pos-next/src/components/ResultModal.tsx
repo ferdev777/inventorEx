@@ -55,7 +55,9 @@ export function ResultModal({ result, error, onClose }: ResultModalProps) {
               <div className="flex justify-between text-sm">
                 <span style={{ color: 'var(--text-tertiary)' }}>Tipo</span>
                 <span style={{ color: 'var(--text-secondary)' }}>
-                  {result.type === 'FISCAL' ? 'Factura B' : 'Interno'}
+                  {result.type === 'FISCAL' 
+                    ? (result.cbteTipo === 1 ? 'Factura A' : result.cbteTipo === 11 ? 'Factura C' : 'Factura B')
+                    : 'Interno'}
                 </span>
               </div>
               {result.cae && (

@@ -100,7 +100,7 @@ export function printReceipt(sale: SaleResult): void {
     </div>
 
     <p style="font-size: 10px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-top: 4px;">
-      ${isFiscal ? 'FACTURA B' : 'COMPROBANTE NO FISCAL'}
+      ${isFiscal ? (sale.cbteTipo === 1 ? 'FACTURA A' : sale.cbteTipo === 11 ? 'FACTURA C' : 'FACTURA B') : 'COMPROBANTE NO FISCAL'}
     </p>
   </div>
 
