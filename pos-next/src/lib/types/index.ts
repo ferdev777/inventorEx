@@ -56,6 +56,9 @@ export interface SaleResult {
   cae: string | null;
   vtoCae: string | null;
   invoiceNumber: number | null;
+  fiscalStatus: 'PENDING' | 'COMPLETED' | 'ERROR' | null;
+  cbteTipo: number | null;
+  ptoVta: number | null;
   items: Array<{
     productName: string;
     quantity: number;

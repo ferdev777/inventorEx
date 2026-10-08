@@ -31,7 +31,10 @@ export function generatePdf(sale: SaleResult): void {
   y += 5;
   centerX('CUIT: 30-12345678-9', y, 9);
   y += 5;
-  centerX(sale.type === 'FISCAL' ? 'FACTURA B' : 'NO FISCAL', y, 10, true);
+  const invoiceLabel = sale.type === 'FISCAL'
+    ? (sale.cbteTipo === 1 ? 'FACTURA A' : sale.cbteTipo === 11 ? 'FACTURA C' : 'FACTURA B')
+    : 'NO FISCAL';
+  centerX(invoiceLabel, y, 10, true);
   y += 8;
 
   // Info
