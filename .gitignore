@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+backend/dist/
+frontend/dist/
+pos-next/.next/
+pos-next/out/
+pos-next/build/
+
+# Database
+*.db
+*.db-journal
+*.sqlite
+
+# Environment (NEVER commit secrets)
+.env
+.env.*
+*.env
+
+# ARCA/AFIP certificates & keys (SENSITIVE — never commit, any location)
+afip_certs/
+certs/
+*.crt
+*.key
+*.csr
+*.pem
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temp
+tmp/
+temp/
+
+# Nx
+.nx/
