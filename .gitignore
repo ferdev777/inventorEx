@@ -8,6 +8,15 @@ pos-next/.next/
 pos-next/out/
 pos-next/build/
 
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+
+
 # Database
 *.db
 *.db-journal

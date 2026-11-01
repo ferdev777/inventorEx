@@ -3,8 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "workspaces": [
-    "frontend/pos-next",
-    "backend"
+    "frontend"
   ],
   "devDependencies": {
     "nx": "latest"
